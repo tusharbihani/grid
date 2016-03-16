@@ -93,6 +93,9 @@ results.controller('SearchResultsCtrl', [
         ctrl.images = [];
         ctrl.newImagesCount = 0;
 
+        // Gallery view toggle
+        ctrl.gallery = false;
+
         // Map to track image->position and help remove duplicates
         let imagesPositions;
 
@@ -259,6 +262,10 @@ results.controller('SearchResultsCtrl', [
                 ctrl.images = compact(ctrl.imagesAll);
             });
         };
+
+        ctrl.showGallery = function() {
+            ctrl.gallery = true;
+        }
 
         // == Vertical position ==
 
