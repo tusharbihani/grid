@@ -7,6 +7,7 @@ import {getCollectionsFromQuery} from '../search-query/query-syntax';
 
 import './query';
 import './results';
+import './gallery';
 import '../preview/image';
 import '../lib/data-structure/list-factory';
 import '../lib/data-structure/ordered-set-factory';
@@ -19,6 +20,7 @@ import '../components/gr-panels/gr-panels';
 
 import searchTemplate        from './view.html!text';
 import searchResultsTemplate from './results.html!text';
+import searchGalleryTemplate from './gallery.html!text';
 import panelTemplate        from '../components/gr-info-panel/gr-info-panel.html!text';
 import collectionsPanelTemplate from
     '../components/gr-collections-panel/gr-collections-panel.html!text';
@@ -28,6 +30,7 @@ export var search = angular.module('kahuna.search', [
     'ct.ui.router.extras.dsr',
     'kahuna.search.query',
     'kahuna.search.results',
+    'kahuna.search.gallery',
     'kahuna.preview.image',
     'data-structure.list-factory',
     'data-structure.ordered-set-factory',
@@ -240,6 +243,11 @@ search.config(['$stateProvider', '$urlMatcherFactoryProvider',
 
                     $scope.$on('$destroy', () => sub.dispose());
                 }]
+            },
+            gallery: {
+                template: searchGalleryTemplate,
+                controller: 'SearchGalleryCtrl',
+                controllerAs: 'ctrl'
             }
         }
     });

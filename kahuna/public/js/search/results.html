@@ -67,6 +67,12 @@
             </div>
         </div>
 
+        <ul ng:if="ctrl.gallery">
+            <li ng:repeat="image in ctrl.images track by image.data.id">
+                
+            </li>
+        </ul>
+
         <ul class="results"
             gu:lazy-table="ctrl.imagesAll"
             gu:lazy-table-cell-min-width="280"
