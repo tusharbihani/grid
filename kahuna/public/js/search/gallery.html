@@ -1,1 +1,13 @@
-<h1>GALLERY VIEW</h1>
+<ul class="gallery flex-right"
+    gu:lazy-gallery="ctrl.images"
+    gu:lazy-gallery-preloaded-items="4">
+    <li ng:repeat="image in ctrl.images track by image.data.id"
+        gu:lazy-gallery-item="image">
+
+        <div class="gallery__item">
+        </div>
+
+    </li>
+</ul>
+
+<div class="gallery__close hide-text" ng:click="closeGallery()">Close</div>
