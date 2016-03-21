@@ -199,6 +199,11 @@ search.config(['$stateProvider', '$urlMatcherFactoryProvider',
                 controller: 'GrCollectionsPanelCtrl',
                 controllerAs: 'ctrl'
             },
+            gallery: {
+                template: searchGalleryTemplate,
+                controller: 'SearchGalleryCtrl',
+                controllerAs: 'ctrl'
+            },
             multiDrag: {
                 template: `<div class="multidrag"></div>`,
                 controller: ['$scope', '$window', '$document', '$element', 'vndMimeTypes',
@@ -243,11 +248,6 @@ search.config(['$stateProvider', '$urlMatcherFactoryProvider',
 
                     $scope.$on('$destroy', () => sub.dispose());
                 }]
-            },
-            gallery: {
-                template: searchGalleryTemplate,
-                controller: 'SearchGalleryCtrl',
-                controllerAs: 'ctrl'
             }
         }
     });
