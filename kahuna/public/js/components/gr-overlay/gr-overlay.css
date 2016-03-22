@@ -1,0 +1,16 @@
+.gr-overlay {
+    background: rgba(20, 20, 20, .75);
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 40;
+    text-align: center;
+}
+
+.gr-overlay__close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
