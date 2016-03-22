@@ -1,0 +1,13 @@
+<div class="fill-height flex-container" ng:class="{ 'flex-container--rtl': ctrl.position == 'right' }">
+    <button class="inner-clickable clickable" type="button"
+        ng:if="!ctrl.state.hidden" ng:click="ctrl.hideOverlay()"
+        ng:class="{'bg-light': !ctrl.state.hidden}">
+        Hide {{ctrl.name}}
+    </button>
+
+    <button class="inner-clickable clickable" type="button"
+        ng:if="ctrl.state.hidden"
+        ng:click="ctrl.showOverlay()">
+        Show {{ctrl.name}}
+    </button>
+</div>
