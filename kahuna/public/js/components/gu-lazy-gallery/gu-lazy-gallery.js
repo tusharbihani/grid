@@ -9,6 +9,10 @@ export var lazyGallery = angular.module('gu.lazyGallery', [
 
 lazyGallery.controller('GuLazyGalleryCtrl', function() {
     let ctrl = this;
+
+    ctrl.getCurrentItem = function() {
+        console.log("CURRENT ITEM");
+    }
 });
 
 lazyGallery.directive('guLazyGallery', ['observe$',
@@ -17,7 +21,7 @@ lazyGallery.directive('guLazyGallery', ['observe$',
         restrict: 'A',
         controller: 'GuLazyGalleryCtrl',
         transclude: true,
-        template: '<p>This is a template</p> <ng-transclude></ng-transclude>',
+        template: '<ng-transclude></ng-transclude>',
         link: function (scope, element, attrs, ctrl) {
             // Map attributes as Observable streams
             const {
@@ -25,8 +29,9 @@ lazyGallery.directive('guLazyGallery', ['observe$',
                 guLazyTablePreloadedItems: preloadedItemsAttr
                 } = attrs;
 
-            const items$ = observeCollection$(scope, itemsAttr);
-
+            const items$ = observeCollection$(scope, itemsAttr),
+                  preloadedItem$ = observeCollection$(scope, preloadedItemsAttr);
+            console.log(ctrl);
             console.log(items$);
         }
     };
