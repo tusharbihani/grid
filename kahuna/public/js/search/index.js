@@ -17,6 +17,7 @@ import '../components/gr-collections-panel/gr-collections-panel';
 import '../components/gr-keyboard-shortcut/gr-keyboard-shortcut';
 
 import '../components/gr-panels/gr-panels';
+import '../components/gr-overlay/gr-overlay';
 
 import searchTemplate        from './view.html!text';
 import searchResultsTemplate from './results.html!text';
@@ -31,11 +32,13 @@ export var search = angular.module('kahuna.search', [
     'kahuna.search.query',
     'kahuna.search.results',
     'kahuna.search.gallery',
+    'kahuna.services.overlay',
     'kahuna.preview.image',
     'data-structure.list-factory',
     'data-structure.ordered-set-factory',
     'gr.topBar',
     'gr.panels',
+    'gr.overlay',
     'gr.keyboardShortcut',
     'grInfoPanel',
     'grCollectionsPanel',
@@ -78,13 +81,14 @@ search.config(['$stateProvider', '$urlMatcherFactoryProvider',
         controllerAs: 'ctrl',
         controller: [
             '$scope', '$window', 'panels', 'shortcutKeys', 'keyboardShortcut',
-            'panelService',
+            'panelService', 'overlays',
             function($scope, $window, panels, shortcutKeys, keyboardShortcut,
-                     panelService) {
+                     panelService, overlays) {
 
             const ctrl = this;
             ctrl.collectionsPanel = panels.collectionsPanel;
             ctrl.metadataPanel = panels.metadataPanel;
+            ctrl.galleryOverlay = overlays.galleryOverlay;
 
             panelService.setAndSaveState($scope, 'collections', ctrl.collectionsPanel);
 
@@ -113,7 +117,13 @@ search.config(['$stateProvider', '$urlMatcherFactoryProvider',
                 const metadataPanel = panelService.createPanel(true);
 
                 return { collectionsPanel, metadataPanel };
-           }]
+            }],
+            overlays: ['overlayService', function(overlayService) {
+                console.log('resolving');
+                const galleryOverlay = overlayService.createOverlay(true);
+                console.log(galleryOverlay);
+                return galleryOverlay;
+            }]
         }
     });
 

@@ -31,7 +31,9 @@
     </gr-panel>
 </gr-panels>
 
-<ui-view name="gallery"></ui-view>
+<gr-overlay gr:overlay="ctrl.galleryOverlay">
+    <ui-view name="gallery"></ui-view>
+</gr-overlay>
 
 <ui-view name="multiDrag"></ui-view>
 <dnd-uploader></dnd-uploader>
