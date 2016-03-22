@@ -30,7 +30,6 @@ gallery.controller('SearchGalleryCtrl', [
 
         const ctrl = this;
 
-        ctrl.showGallery = false;
         ctrl.images = [];
 
         function search({until, since, offset, length, orderBy} = {}) {
@@ -83,9 +82,5 @@ gallery.controller('SearchGalleryCtrl', [
             ctrl.images = images.data;
             return images;
         });
-
-        ctrl.closeGallery = function() {
-            ctrl.showGallery = false;
-        }
     }
 ]);
