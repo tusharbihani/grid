@@ -15,10 +15,9 @@
 
     <button class="search__advanced-toggle"
             type="button"
-            ng:click="advancedShown = !advancedShown">
-        <span ng:hide="advancedShown">▸</span>
-        <span ng:show="advancedShown">▾</span>
-        Advanced
+            ng:click="searchInfo = !searchInfo"
+            gr-tooltip="Display advanced search information">
+        <gr-icon>info_outline</gr-icon>
     </button>
 
     <div class="search__modifier-container">
@@ -32,13 +31,23 @@
         <ul class="search__modifier search__filter" ng:class="filtersShown ? 'search__filter--show' : 'search__filter--hide'">
             <li class="search__modifier-item">
             <label>
-                <!-- minor mindfuck logic as we want an optional flag
+               <!-- minor mindfuck logic as we want an optional flag
                             when the option is off -->
                 <input type="checkbox"
                     ng:model="searchQuery.filter.nonFree"
                     ng:true-value="undefined"
                     ng:false-value="'true'" />
                 Free to use only
+
+                <!-- TODO: Decide on correct cost filter model -->
+                <!--
+                <select ng:init="searchQuery.filter.payType = searchQuery.filter.payType || 'free'"
+                        ng:model="searchQuery.filter.payType"
+                        ng-options="item.value as item.label for item in searchQuery.payTypeOptions">
+
+                </select>
+                -->
+
             </label>
             </li>
 
@@ -120,4 +129,4 @@
     </div>
 </form>
 
-<gr-syntax ng:if="advancedShown"></gr-syntax>
+<gr-syntax ng:if="searchInfo"></gr-syntax>

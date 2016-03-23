@@ -128,7 +128,7 @@ search.config(['$stateProvider', '$urlMatcherFactoryProvider',
     });
 
     $stateProvider.state('search.results', {
-        url: 'search?{query:Query}&ids&since&nonFree&uploadedBy&until&orderBy' +
+        url: 'search?{query:Query}&ids&since&nonFree&payType&uploadedBy&until&orderBy' +
              '&dateField&takenSince&takenUntil&modifiedSince&modifiedUntil',
         // Non-URL parameters
         params: {
