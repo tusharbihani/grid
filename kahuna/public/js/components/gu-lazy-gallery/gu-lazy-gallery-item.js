@@ -5,7 +5,6 @@ export var lazyGalleryItem = angular.module('gu.lazyGalleryItem', [
 ]);
 
 lazyGalleryItem.controller = ('GuLazyGalleryItemCtrl', [
-
     function() {
         const ctrl = this;
     }
