@@ -9,6 +9,10 @@
     text-align: center;
 }
 
+.gr-overlay--hidden {
+    display: none;
+}
+
 .gr-overlay__close {
     position: absolute;
     top: 20px;

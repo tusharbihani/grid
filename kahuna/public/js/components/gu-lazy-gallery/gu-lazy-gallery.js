@@ -31,8 +31,6 @@ lazyGallery.directive('guLazyGallery', ['observe$',
 
             const items$ = observeCollection$(scope, itemsAttr),
                   preloadedItem$ = observeCollection$(scope, preloadedItemsAttr);
-            console.log(ctrl);
-            console.log(items$);
         }
     };
 }]);

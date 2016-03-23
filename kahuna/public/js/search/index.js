@@ -115,14 +115,11 @@ search.config(['$stateProvider', '$urlMatcherFactoryProvider',
             panels: ['panelService', function(panelService) {
                 const collectionsPanel = panelService.createPanel(true);
                 const metadataPanel = panelService.createPanel(true);
-
                 return { collectionsPanel, metadataPanel };
             }],
             overlays: ['overlayService', function(overlayService) {
-                console.log('resolving');
                 const galleryOverlay = overlayService.createOverlay(true);
-                console.log(galleryOverlay);
-                return galleryOverlay;
+                return {galleryOverlay};
             }]
         }
     });

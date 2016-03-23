@@ -62,6 +62,7 @@ results.controller('SearchResultsCtrl', [
     'selectedImages$',
     'results',
     'panels',
+    'overlays',
     'range',
     'isReloadingPreviousSearch',
 
@@ -82,6 +83,7 @@ results.controller('SearchResultsCtrl', [
              selectedImages$,
              results,
              panels,
+             overlays,
              range,
              isReloadingPreviousSearch) {
 
@@ -90,6 +92,8 @@ results.controller('SearchResultsCtrl', [
         // Panel control
         ctrl.metadataPanel    = panels.metadataPanel;
         ctrl.collectionsPanel = panels.collectionsPanel;
+
+        ctrl.galleryOverlay = overlays.galleryOverlay;
 
         ctrl.images = [];
         ctrl.newImagesCount = 0;

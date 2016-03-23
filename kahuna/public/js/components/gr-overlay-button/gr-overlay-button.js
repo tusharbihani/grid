@@ -4,12 +4,14 @@ import '../../util/rx';
 
 export const overlayButton = angular.module('gr.overlayButton', ['util.rx']);
 
-overlayButton.controller('GrOverlayButton', [function() {
+overlayButton.controller('GrOverlayButton', ['$scope', 'inject$', function($scope, inject$) {
         const ctrl = this;
         const overlay = ctrl.overlay;
 
         ctrl.showOverlay   = () => overlay.setHidden(false);
         ctrl.hideOverlay  = () => overlay.setHidden(true);
+
+        inject$($scope, overlay.state$, ctrl, 'state');
     }
 ]);
 

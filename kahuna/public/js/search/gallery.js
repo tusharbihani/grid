@@ -21,16 +21,19 @@ gallery.controller('SearchGalleryCtrl', [
     '$state',
     '$stateParams',
     'mediaApi',
+    'overlays',
 
     function($rootScope,
              $scope,
              $state,
              $stateParams,
-             mediaApi) {
+             mediaApi,
+             overlays) {
 
         const ctrl = this;
 
         ctrl.images = [];
+        ctrl.galleryOverlay = overlays.galleryOverlay;
 
         function search({until, since, offset, length, orderBy} = {}) {
             // FIXME: Think of a way to not have to add a param in a million places to add it

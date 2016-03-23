@@ -10,20 +10,25 @@ export const overlay = angular.module('gr.overlay', [
     overlayService.name
 ]);
 
-overlay.directive('grOverlay', [function() {
+overlay.directive('grOverlay', ['inject$',
+    function(inject$) {
         return {
             restrict: 'E',
             replace: true,
             transclude: true,
             scope: {
-                panel: '=grOverlay'
+                overlay: '=grOverlay'
             },
             template: `<div class="gr-overlay"
                 ng:class="{ 'gr-overlay--hidden': state.hidden }">
                 <div class="gr-overlay__content">
                     <ng:transclude></ng:transclude>
                 </div>
-            </div>`
+            </div>`,
+            link: function(scope) {
+                const overlay = scope.overlay;
+                inject$(scope, overlay.state$, scope, 'state');
+            }
         };
     }
 ]);
