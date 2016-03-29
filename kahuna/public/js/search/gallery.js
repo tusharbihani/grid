@@ -1,6 +1,7 @@
 import angular from 'angular';
 
 import '../components/gu-lazy-gallery/gu-lazy-gallery';
+import '../imgops/service';
 
 export var gallery = angular.module('kahuna.search.gallery', [
     'gu.lazyGallery'
@@ -22,13 +23,15 @@ gallery.controller('SearchGalleryCtrl', [
     '$stateParams',
     'mediaApi',
     'overlays',
+    'imgops',
 
     function($rootScope,
              $scope,
              $state,
              $stateParams,
              mediaApi,
-             overlays) {
+             overlays,
+             imgops) {
 
         const ctrl = this;
 
@@ -81,8 +84,16 @@ gallery.controller('SearchGalleryCtrl', [
             }));
         }
 
+        function optimiseImage(image) {
+            return imgops.getLowResUri(image);
+        }
+
         ctrl.searched = search({length: 10, orderBy: 'newest'}).then(function(images) {
             ctrl.images = images.data;
+
+            ctrl.optimisedImages = images.data.map(optimiseImage);
+
+            console.log(ctrl.optimisedImages);
             return images;
         });
     }
