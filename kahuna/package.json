@@ -50,18 +50,6 @@
             ]
           }
         }
-      },
-      "npm:cropperjs@0.7.0": {
-        "main": "dist/cropper",
-        "jspmNodeConversion": false,
-        "dependencies": {
-          "css": "npm:system-css"
-        },
-        "shim": {
-          "dist/cropper": [
-            "./cropper.css!"
-          ]
-        }
       }
     }
   },
