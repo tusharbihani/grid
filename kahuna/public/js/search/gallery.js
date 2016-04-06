@@ -85,7 +85,11 @@ gallery.controller('SearchGalleryCtrl', [
         }
 
         function optimiseImage(image) {
-            return imgops.getLowResUri(image);
+            var optimisedImage;
+            
+            imgops.getLowResUri(image)
+                .then(resp => Promise.resolve(optimisedImage = resp))
+                .then(() => optimisedImage);
         }
 
         ctrl.searched = search({length: 10, orderBy: 'newest'}).then(function(images) {
@@ -93,7 +97,6 @@ gallery.controller('SearchGalleryCtrl', [
 
             ctrl.optimisedImages = images.data.map(optimiseImage);
 
-            console.log(ctrl.optimisedImages);
             return images;
         });
     }

@@ -2,12 +2,12 @@
     <button class="inner-clickable clickable" type="button"
         ng:if="!ctrl.state.hidden" ng:click="ctrl.hideOverlay()"
         ng:class="{'bg-light': !ctrl.state.hidden}">
-        Hide {{ctrl.name}}
+        <gr-icon-label gr-icon="highlight_off">Hide {{ctrl.name}}</gr-icon-label>
     </button>
 
     <button class="inner-clickable clickable" type="button"
         ng:if="ctrl.state.hidden"
         ng:click="ctrl.showOverlay()">
-        Show {{ctrl.name}}
+        <gr-icon-label gr-icon="find_in_page">Show {{ctrl.name}}</gr-icon-label>
     </button>
 </div>
