@@ -2295,6 +2295,10 @@ FIXME: what to do with touch devices
         color: black !important;
     }
 
+    .easel__canvas {
+        overflow: visible;
+    }
+
     .easel__image {
         float: left;
         max-width: 100%;
