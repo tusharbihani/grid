@@ -1,10 +1,7 @@
-<ul class="gallery flex-right"
-    gu:lazy-gallery="ctrl.images"
+<gr-lazy-gallery
+    gu:lazy-gallery-items="ctrl.optimisedImages"
     gu:lazy-gallery-preloaded-items="4">
-    <li ng:repeat="image in ctrl.optimisedImages"
-        gu:lazy-gallery-item="image">
-    </li>
-</ul>
+</gr-lazy-gallery>
 
 <gr-overlay-button
     class="gr-overlay__close"

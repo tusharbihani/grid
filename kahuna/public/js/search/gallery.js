@@ -1,10 +1,13 @@
 import angular from 'angular';
+import Rx from 'rx';
 
+import '../util/rx';
 import '../components/gu-lazy-gallery/gu-lazy-gallery';
 import '../imgops/service';
 
 export var gallery = angular.module('kahuna.search.gallery', [
-    'gu.lazyGallery'
+    'gu.lazyGallery',
+    'util.rx'
 ]);
 
 // Global session-level state to remember the uploadTime of the first
@@ -24,6 +27,8 @@ gallery.controller('SearchGalleryCtrl', [
     'mediaApi',
     'overlays',
     'imgops',
+    'inject$',
+    'subscribe$',
 
     function($rootScope,
              $scope,
@@ -31,11 +36,15 @@ gallery.controller('SearchGalleryCtrl', [
              $stateParams,
              mediaApi,
              overlays,
-             imgops) {
+             imgops,
+             inject$,
+             subscribe$) {
 
         const ctrl = this;
 
         ctrl.images = [];
+        ctrl.optimisedImages = [];
+
         ctrl.galleryOverlay = overlays.galleryOverlay;
 
         function search({until, since, offset, length, orderBy} = {}) {
@@ -85,19 +94,13 @@ gallery.controller('SearchGalleryCtrl', [
         }
 
         function optimiseImage(image) {
-            var optimisedImage;
-            
-            imgops.getLowResUri(image)
-                .then(resp => Promise.resolve(optimisedImage = resp))
-                .then(() => optimisedImage);
+            return Rx.Observable.fromPromise(imgops.getLowResUri(image));
         }
 
         ctrl.searched = search({length: 10, orderBy: 'newest'}).then(function(images) {
-            ctrl.images = images.data;
-
-            ctrl.optimisedImages = images.data.map(optimiseImage);
-
-            return images;
+            ctrl.images = Rx.Observable.fromArray(images.data);
+            const optimisedImages$ = ctrl.images.flatMap(optimiseImage).toArray();
+            inject$($scope, optimisedImages$, ctrl, 'optimisedImages');
         });
     }
 ]);

@@ -2209,6 +2209,45 @@ FIXME: what to do with touch devices
     text-align: center;
 }
 
+/* ==========================================================================
+   Gallery view
+   ========================================================================== */
+.gallery {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    overflow-x: auto;
+    height: 100vh;
+    align-items: baseline;
+}
+
+.gallery__item {
+    display: block;
+    box-sizing: border-box;
+    padding: 40px 0;
+    flex: 0 0 100%;
+    align-content: center;
+}
+
+.gallery__image {
+
+}
+
+.gallery__control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 20px;
+}
+
+.gallery__control--prev {
+    left: 0;
+}
+
+.gallery__control--next {
+    right: 0;
+}
+
 @media print {
 
     /* ==========================================================================
