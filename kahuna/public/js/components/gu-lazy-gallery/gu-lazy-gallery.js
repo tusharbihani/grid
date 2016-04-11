@@ -2,13 +2,9 @@ import angular from 'angular';
 import Rx from 'rx';
 
 import '../../util/rx';
-import './gu-lazy-gallery-item';
-import './gu-lazy-gallery-control';
 
 export var lazyGallery = angular.module('gu.lazyGallery', [
-    'util.rx',
-    'gu.lazyGalleryItem',
-    'gu.lazyGalleryControl'
+    'util.rx'
 ]);
 
 lazyGallery.controller('GuLazyGalleryCtrl', function() {
