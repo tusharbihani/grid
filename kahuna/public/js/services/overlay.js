@@ -18,7 +18,6 @@ overlayService.factory('overlayService',
         }
 
         function newOverlay(hidden = false, locked = false) {
-            console.log('New overlay');
             const startOp = () => ({hidden, locked});
             const stateSub$ = new Rx.Subject();
 
