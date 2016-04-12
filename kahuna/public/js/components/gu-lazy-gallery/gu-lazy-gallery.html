@@ -1,16 +1,20 @@
-<ul class="gallery flex-right">
+<ul class="gallery flex-right"
+    gu:lazy-gallery-list="gallery">
     <li ng:repeat="item in galleryItems"
-        gu:lazy-gallery-item="image" class="gallery__item">
-        <img src="{{image}}" class="gallery__image" />
+        class="gallery__item">
+        <img src="{{item}}" class="gallery__image" />
     </li>
 </ul>
 
-<button ng-click="previousItem()"
-        class="gallery__control gallery__control--prev">
-    <gr-icon>skip_previous</gr-icon>Previous
-</button>
-<button
-    ng-click="nextItem()"
-    class="gallery__control gallery__control--next">
-    Next<gr-icon>skip_next</gr-icon>
-</button>
+<div class="gallery__controls">
+    <button ng-click="ctrl.previousItem()"
+            class="gallery__control gallery__control--prev">
+        <gr-icon>skip_previous</gr-icon>Previous
+    </button>
+    <button
+        ng-click="ctrl.nextItem()"
+        class="gallery__control gallery__control--next">
+        Next<gr-icon>skip_next</gr-icon>
+    </button>
+</div>
+
