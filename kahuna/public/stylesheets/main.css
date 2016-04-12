@@ -2232,9 +2232,8 @@ FIXME: what to do with touch devices
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    overflow-x: auto;
     height: 100vh;
-    align-items: baseline;
+    align-items: center;
 }
 
 .gallery__item {
@@ -2243,6 +2242,7 @@ FIXME: what to do with touch devices
     padding: 40px 0;
     flex: 0 0 100%;
     align-content: center;
+    transition: transform 0.5s ease-in-out;
 }
 
 .gallery__image {
