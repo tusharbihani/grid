@@ -1,11 +1,12 @@
 package com.gu.mediaservice.lib.aws
 
 import java.io.File
-import java.net.{URLEncoder, URI}
+import java.net.{URI, URLEncoder}
 
 import com.amazonaws.auth.AWSCredentials
+import com.amazonaws.regions.{RegionUtils, Region}
 import com.amazonaws.services.s3.model._
-import com.amazonaws.services.s3.{AmazonS3, AmazonS3Client}
+import com.amazonaws.services.s3.{S3ClientOptions, AmazonS3, AmazonS3Client}
 import com.gu.mediaservice.model.Image
 import org.joda.time.DateTime
 
@@ -19,17 +20,20 @@ case class S3Object(uri: URI, size: Long, metadata: S3Metadata)
 case class S3Metadata(userMetadata: Map[String, String], objectMetadata: S3ObjectMetadata)
 case class S3ObjectMetadata(contentType: Option[String], cacheControl: Option[String], lastModified: Option[DateTime] = None)
 
-class S3(credentials: AWSCredentials) {
-
-  val s3Endpoint = "s3.amazonaws.com"
+class S3(credentials: AWSCredentials, region: Region = RegionUtils.getRegion("eu-west-1")) {
 
   type Bucket = String
   type Key = String
   type UserMetadata = Map[String, String]
 
 
+  // configure client to generate URLs of the form `https://s3.amazonaws.com/{bucket}/{key}`
+  // rather than `https://{bucket}.s3.amazonaws.com/{key}`
+  // this means buckets that contain `.` characters do not cause browsers to complain about certificate mismatching
+  lazy val clientOptions: S3ClientOptions = new S3ClientOptions().withPathStyleAccess(true)
+
   lazy val client: AmazonS3 =
-    new AmazonS3Client(credentials) <| (_ setEndpoint s3Endpoint)
+    new AmazonS3Client(credentials) <| (_ setS3ClientOptions clientOptions) <| (_ setRegion region)
 
   private def removeExtension(filename: String): String = {
     val regex = """\.[a-zA-Z]{3,4}$""".r
@@ -128,8 +132,7 @@ class S3(credentials: AWSCredentials) {
   }
 
   private def objectUrl(bucket: Bucket, key: Key): URI = {
-    val bucketUrl = s"$bucket.$s3Endpoint"
-    new URI("http", bucketUrl, s"/$key", null)
+    new URI("https", s"s3-$region.amazonaws.com", s"/$bucket/$key", null)
   }
 
 }
