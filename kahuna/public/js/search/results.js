@@ -306,7 +306,6 @@ results.controller('SearchResultsCtrl', [
                 archived:   $stateParams.archived,
                 free:       $stateParams.nonFree === 'true' ? undefined: true,
                 // Disabled while paytype filter unavailable
-                //payType:    $stateParams.payType || 'free',
                 uploadedBy: $stateParams.uploadedBy,
                 takenSince: $stateParams.takenSince,
                 takenUntil: $stateParams.takenUntil,
