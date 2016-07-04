@@ -25,6 +25,7 @@ object Global extends WithFilters(CorsFilter, RequestLoggingFilter, new GzipFilt
 
   override def onStop(app: Application) {
     subscription.unsubscribe
+    
   }
 
 }
