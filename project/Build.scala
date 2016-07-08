@@ -134,7 +134,6 @@ object Build extends Build {
     .libraryDependencies(awsDeps ++ scanamoDeps)
     .testDependencies(scalaTestDeps)
 
-
   val integration = project("integration")
     .dependsOn(lib)
     .libraryDependencies(awsDeps ++ scalazDeps ++ uriTemplateDeps ++ playWsDeps)

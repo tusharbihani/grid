@@ -24,7 +24,7 @@ object Dependencies {
   val elasticsearchDeps = Seq("org.elasticsearch" % "elasticsearch" % elasticsearchVersion)
 
   val awsDeps = Seq(
-    ("com.amazonaws" % "aws-java-sdk" % "1.10.69")
+    ("com.amazonaws" % "aws-java-sdk" % "1.11.8")
   )
 
   val pandaDeps = Seq(
@@ -59,7 +59,7 @@ object Dependencies {
   )
 
   val loggingDeps = Seq(
-    "com.gu" % "kinesis-logback-appender" % "1.0.5",
+    "com.gu" % "kinesis-logback-appender" % "1.3.0",
     "net.logstash.logback" % "logstash-logback-encoder" % "4.4"
   )
 
@@ -85,7 +85,7 @@ object Dependencies {
     "com.yakaz.elasticsearch.plugins" % "elasticsearch-action-updatebyquery" % "2.2.0"
   )
 
-  val kinesisDeps = Seq("com.amazonaws" % "amazon-kinesis-client" % "1.2.1")
+  val kinesisDeps = Seq("com.amazonaws" % "amazon-kinesis-client" % "1.6.4")
 
   val thriftDeps = Seq(
     "com.twitter" %% "scrooge-core" % "4.6.0",
