@@ -14,12 +14,13 @@ object Global extends WithFilters(CorsFilter, RequestLoggingFilter, new GzipFilt
 
   lazy val keyStore = new KeyStore(keyStoreBucket, awsCredentials)
 
+  override def onStart(app: Application) {
+    keyStore.scheduleUpdates(Akka.system(app).scheduler)
+  }
+
   override def beforeStart(app: Application): Unit = {
     LogConfig.init(Config)
   }
 
-  override def onStart(app: Application) {
-    keyStore.scheduleUpdates(Akka.system(app).scheduler)
-  }
 }
 
