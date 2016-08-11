@@ -70,7 +70,7 @@ gr-leases .gu-date-range__overlay {
   position: absolute;
   z-index: 1;
   right: 0;
-    top: 28px; /* Magical height of the button that triggers it */
+  top: 28px; /* Magical height of the button that triggers it */
 }
 
 gr-leases .gu-date-range__display {
