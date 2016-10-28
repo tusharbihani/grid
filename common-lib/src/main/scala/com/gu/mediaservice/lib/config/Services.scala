@@ -18,7 +18,8 @@ class Services(domainRoot: String, ssl: Boolean) {
   val leasesHost: String   = s"$appName-leases.$parentDomain"
   val authHost: String     = s"$appName-auth.$parentDomain"
 
-  val composerHost: String     = s"composer.$parentDomain"
+  // Grid and Composer share heterogeneous env names
+  val composerHost: String     = s"composer.$parentDomain".replaceFirst("test","code")
 
   val kahunaBaseUri      = baseUri(kahunaHost)
   val apiBaseUri         = baseUri(apiHost)
