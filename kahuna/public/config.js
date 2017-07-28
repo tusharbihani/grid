@@ -9,14 +9,13 @@ System.config({
   },
 
   map: {
-    "angular": "github:angular/bower-angular@1.4.3",
-    "angular-animate": "github:angular/bower-angular-animate@1.4.3",
+    "angular": "npm:angular@1.5.0",
+    "angular-animate": "npm:angular-animate@1.5.0",
     "angular-bootstrap": "github:angular-ui/bootstrap-bower@0.13.4",
     "angular-elastic": "github:monospaced/angular-elastic@2.5.1",
     "angular-hotkeys": "github:chieffancypants/angular-hotkeys@1.6.0",
-    "angular-messages": "github:angular/bower-angular-messages@1.4.3",
-    "angular-ui-router": "github:angular-ui/ui-router@0.2.15",
-    "angular-ui-router-extras": "github:christopherthielen/ui-router-extras@0.0.14",
+    "angular-messages": "npm:angular-messages@1.5.0",
+    "angular-ui-router": "npm:angular-ui-router@1.0.3",
     "angular-xeditable": "github:vitalets/angular-xeditable@0.1.9",
     "clean-css": "npm:clean-css@3.4.8",
     "cropperjs": "npm:cropperjs@0.7.0",
@@ -42,16 +41,7 @@ System.config({
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.93",
     "ua-parser-js": "npm:ua-parser-js@0.7.3",
     "uri-templates": "npm:uri-templates@0.1.5",
-    "github:angular-ui/ui-router@0.2.15": {
-      "angular": "github:angular/bower-angular@1.4.3"
-    },
-    "github:angular/bower-angular-animate@1.4.3": {
-      "angular": "github:angular/bower-angular@1.4.3"
-    },
     "github:chieffancypants/angular-hotkeys@1.6.0": {
-      "angular": "github:angular/bower-angular@1.4.3"
-    },
-    "github:christopherthielen/ui-router-extras@0.0.14": {
       "angular": "github:angular/bower-angular@1.4.3"
     },
     "github:dbushell/Pikaday@1.4.0": {
@@ -103,11 +93,24 @@ System.config({
       "angular": "github:angular/bower-angular@1.4.3",
       "css": "github:systemjs/plugin-css@0.1.13"
     },
+    "npm:@uirouter/core@5.0.3": {
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "systemjs-json": "github:systemjs/plugin-json@0.1.0"
+    },
     "npm:amdefine@1.0.0": {
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "module": "github:jspm/nodelibs-module@0.1.0",
       "path": "github:jspm/nodelibs-path@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:angular-animate@1.5.0": {
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:angular-ui-router@1.0.3": {
+      "@uirouter/core": "npm:@uirouter/core@5.0.3",
+      "angular": "npm:angular@1.5.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "systemjs-json": "github:systemjs/plugin-json@0.1.0"
     },
     "npm:any-http-angular@0.1.0": {
       "angular": "github:angular/bower-angular@1.4.3"

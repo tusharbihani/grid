@@ -1,5 +1,5 @@
 import angular from 'angular';
-import 'angular-ui-router-extras';
+import 'angular-ui-router';
 import Rx from 'rx';
 import 'rx-dom';
 import Immutable from 'immutable';
@@ -25,7 +25,6 @@ import collectionsPanelTemplate from
 
 
 export var search = angular.module('kahuna.search', [
-    'ct.ui.router.extras.dsr',
     'kahuna.search.query',
     'kahuna.search.results',
     'kahuna.preview.image',
