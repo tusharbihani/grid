@@ -29,7 +29,7 @@ export const filterFields = [
     'usages@>added',
     'usages@platform',
     'usages@status',
-    'hasCrops'
+    'has'
 ];
 // TODO: add date fields
 
@@ -136,7 +136,7 @@ querySuggestions.factory('querySuggestions', ['mediaApi', 'editsApi', function(m
         case 'by':       return listPhotographers().then(prefixFilter(value));
         case 'illustrator': return listIllustrators().then(prefixFilter(value));
         case 'category': return listCategories().then(prefixFilter(value));
-        case 'hasCrops': return ['true', 'false'];
+        case 'has': return ['crops', 'rightsAcquired'];
         // No suggestions
         default:         return [];
         }

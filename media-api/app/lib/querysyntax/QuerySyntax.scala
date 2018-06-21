@@ -32,6 +32,7 @@ class QuerySyntax(val input: ParserInput) extends Parser with ImageFields {
     ScopedMatch ~> Match | HashMatch | CollectionRule |
     DateConstraintMatch |
     DateRangeMatch ~> Match | AtMatch |
+    HasMatch ~> Match |
     AnyMatch
   }
 
@@ -99,7 +100,8 @@ class QuerySyntax(val input: ParserInput) extends Parser with ImageFields {
     "supplier" |
     "collection" |
     "keyword" |
-    "label"
+    "label" |
+    "has"
   }
 
   def resolveNamedField(name: String): Field = (name match {
@@ -138,7 +140,16 @@ class QuerySyntax(val input: ParserInput) extends Parser with ImageFields {
 
   def AtMatch = rule { '@' ~ MatchDateRangeValue ~> (range => Match(SingleField(getFieldPath("uploadTime")), range)) }
 
+  def HasMatch = rule { capture(AllowedHasFieldName) ~> resolveHasField _ }
+
   def MatchDateField = rule { capture(AllowedDateFieldName) ~> resolveDateField _ }
+
+  def AllowedHasFieldName = rule { "crops" | "syndication" }
+
+  def resolveHasField(name: String): Field = name match {
+    case "crops"        => SingleField("exports")
+    case "syndication"  => SingleField("rightsAcquired")
+  }
 
   def resolveDateField(name: String): Field = name match {
     case "date" | "uploaded" => SingleField("uploadTime")
