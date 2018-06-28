@@ -1,13 +1,13 @@
 package com.gu.mediaservice.lib.elasticsearch
 
+import java.net.InetSocketAddress
+
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.client.Client
-import org.elasticsearch.client.transport.TransportClient
-import org.elasticsearch.common.settings.{ImmutableSettings, Settings}
-import org.elasticsearch.common.transport.InetSocketTransportAddress
-
+import org.elasticsearch.common.settings.Settings
+import org.elasticsearch.common.transport.TransportAddress
+import org.elasticsearch.transport.client.PreBuiltTransportClient
 import play.api.Logger
-
 
 trait ElasticSearchClient {
 
@@ -21,20 +21,26 @@ trait ElasticSearchClient {
 
   val initialImagesIndex = "images"
 
-  private lazy val settings: Settings =
-    ImmutableSettings.settingsBuilder
+  private lazy val settings: Settings = {
+    Logger.info(s"Using cluster name $cluster")
+    Settings.builder()
       .put("cluster.name", cluster)
       .put("client.transport.sniff", false)
       .build
+  }
 
-  lazy val client: Client =
-    new TransportClient(settings)
-      .addTransportAddress(new InetSocketTransportAddress(host, port))
+  lazy val client: Client = {
+    Logger.info(s"Using cluster host $host")
+    Logger.info(s"Using cluster port $port")
+
+    new PreBuiltTransportClient(settings)
+      .addTransportAddress(new TransportAddress(new InetSocketAddress(host, port)))
+  }
 
   def ensureAliasAssigned() {
     Logger.info(s"Checking alias $imagesAlias is assigned to index…")
 
-    if (getCurrentAlias.isEmpty) {
+    if (!checkAliasExists) {
       ensureIndexExists(initialImagesIndex)
       assignAliasTo(initialImagesIndex)
     }
@@ -62,20 +68,24 @@ trait ElasticSearchClient {
     client.admin.indices.delete(new DeleteIndexRequest(index)).actionGet
   }
 
-  def getCurrentAlias: Option[String] = {
-    // getAliases returns null, so wrap it in an Option
-    Option(client.admin.cluster
-      .prepareState.execute
-      .actionGet.getState
-      .getMetaData.getAliases.get(imagesAlias))
-      .map(_.keys.toArray.head.toString)
+  def checkAliasExists: Boolean = {
+
+    import scala.collection.JavaConverters._
+
+    client.admin.cluster
+      .prepareState.execute.actionGet.getState.getMetaData.getAliasAndIndexLookup.asScala
+      .get(imagesAlias)
+      .isDefined
+
   }
 
   def getCurrentIndices: List[String] = {
     Option(client.admin.cluster
-      .prepareState.execute
-      .actionGet.getState
-      .getMetaData.getAliases.get(imagesAlias))
+      .prepareState
+      .get
+      .getState
+      .getMetaData
+      .getIndices)
       .map(_.keys.toArray.map(_.toString).toList).getOrElse(Nil)
   }
 

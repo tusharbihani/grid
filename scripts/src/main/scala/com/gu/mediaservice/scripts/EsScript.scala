@@ -26,7 +26,7 @@ object MoveIndex extends EsScript {
       val cluster = esCluster
 
       def move {
-        val srcIndex = getCurrentAlias.get // TODO: error handling if alias isn't attached
+        val srcIndex = checkAliasExists.get // TODO: error handling if alias isn't attached
         val srcIndexVersionCheck = """images_(\d+)""".r
         val srcIndexVersion = srcIndex match {
           case srcIndexVersionCheck(version) => version.toInt
@@ -186,7 +186,7 @@ object UpdateMapping extends EsScript {
       val cluster = esCluster
 
       def updateMappings(specifiedIndex: Option[String]) {
-        val index = getCurrentAlias.getOrElse(imagesAlias)
+        val index = checkAliasExists.getOrElse(imagesAlias)
         println(s"updating mapping on index: $index")
         client.admin.indices
           .preparePutMapping(index)
@@ -217,7 +217,7 @@ object GetMapping extends EsScript {
       val cluster = esCluster
 
       def getMappings(specifiedIndex: Option[String]) {
-        val index = getCurrentAlias.getOrElse(imagesAlias)
+        val index = checkAliasExists.getOrElse(imagesAlias)
         println(s"getting mapping on index: $index")
         val result = client.admin.indices
           .prepareGetMappings(index)
@@ -258,7 +258,7 @@ object UpdateSettings extends EsScript {
       }
 
       def updateSettings {
-        val alias = getCurrentAlias.getOrElse(imagesAlias)
+        val alias = checkAliasExists.getOrElse(imagesAlias)
         val indices = client.admin.indices
         indices.close(new CloseIndexRequest(alias))
 
