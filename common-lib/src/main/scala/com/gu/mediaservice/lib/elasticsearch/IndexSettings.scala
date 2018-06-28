@@ -1,7 +1,6 @@
 package com.gu.mediaservice.lib.elasticsearch
 
 import play.api.libs.json.Json
-import play.api.libs.json.Json.JsValueWrapper
 
 object IndexSettings {
   def customAnalyzer(tokenizer: String, filters: List[String]) =
@@ -39,7 +38,6 @@ object IndexSettings {
     ("filter" -> filter),
     ("analyzer" -> analyzers)
   ).toMap
-  )
 
   val imageSettings: Map[String, Any] = List(
     ("analysis" -> analysis)
