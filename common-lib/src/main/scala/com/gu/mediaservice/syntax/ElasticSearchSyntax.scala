@@ -1,25 +1,17 @@
 package com.gu.mediaservice
 package syntax
 
-import java.util.regex.Pattern
+import org.elasticsearch.action._
+import org.elasticsearch.action.get.GetResponse
+import org.elasticsearch.search.SearchHit
+import play.api.libs.json.{JsValue, Json}
+import scala.concurrent.{Future, Promise}
+import play.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
 
-import org.elasticsearch.action.{ActionResponse, ActionRequest, ActionRequestBuilder, ListenableActionFuture}
-import org.elasticsearch.action.get.GetResponse
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder
-
-import play.api.libs.json.{JsValue, Json}
-import com.gu.mediaservice.lib.elasticsearch.FutureConversions
-import play.api.Logger
-import org.elasticsearch.search.SearchHit
-
 
 trait ElasticSearchSyntax {
-
-  final implicit class ListenableActionFutureSyntax[A](self: ListenableActionFuture[A]) {
-    def asScala: Future[A] = FutureConversions(self)
-  }
 
   final implicit class GetResponseSyntax(self: GetResponse) {
     def sourceOpt: Option[JsValue] = Option(self.getSourceAsString) map Json.parse
@@ -33,10 +25,16 @@ trait ElasticSearchSyntax {
         val start = System.currentTimeMillis
         () => System.currentTimeMillis - start
       }
-      val future = self.execute.asScala
-      future.foreach { case _ => Logger.info(s"$message - query returned successfully in ${elapsed()} ms") }
-      future.failed.foreach { case e => Logger.error(s"$message - query failed after ${elapsed()} ms: ${e.getMessage} cs: ${e.getCause}") }
-      future
+      val promise = Promise[A]()
+      val future = self.execute(
+        new ActionListener[A] {
+          def onFailure(e: Exception) { promise.failure(e) }
+          def onResponse(response: A) { promise.success(response) }
+        }
+      )
+      promise.future.foreach { case _ => Logger.info(s"$message - query returned successfully in ${elapsed()} ms") }
+      promise.future.failed.foreach { case e => Logger.error(s"$message - query failed after ${elapsed()} ms: ${e.getMessage} cs: ${e.getCause}") }
+      promise.future
     }
   }
 
