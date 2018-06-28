@@ -24,26 +24,25 @@ object IndexSettings {
   val hierarchyAnalyserName = "hierarchyAnalyzer"
   val hierarchyAnalyzer = customAnalyzer("path_hierarchy", List("lowercase"))
 
-  val filter = Json.obj(
-    "s_stemmer"                  -> Json.obj("type" -> "stemmer", "language"  -> "minimal_english"),
-    "gu_stopwords"               -> Json.obj("type" -> "stop",    "stopwords" -> "_english_"),
-    "english_possessive_stemmer" -> Json.obj("type" -> "stemmer", "language"  -> "possessive_english")
+  val filter: Map[String, Any] = List(
+    ("s_stemmer"                  -> List(("type" -> "stemmer"), ("language"  -> "minimal_english")).toMap),
+    ("gu_stopwords"               -> List(("type" -> "stop"),    ("stopwords" -> "_english_")).toMap),
+    ("english_possessive_stemmer" -> List(("type" -> "stemmer"), ("language"  -> "possessive_english")).toMap)
+  ).toMap
+
+  val analyzers: Map[String, Any] = List(
+    (enslishSStemmerAnalyzerName -> englishSStemmerAnalyzer),
+    (hierarchyAnalyserName -> hierarchyAnalyzer)
+  ).toMap
+
+  val analysis: Map[String, Any] = List(
+    ("filter" -> filter),
+    ("analyzer" -> analyzers)
+  ).toMap
   )
 
-  val analyzers = Json.obj(
-    enslishSStemmerAnalyzerName -> englishSStemmerAnalyzer,
-    hierarchyAnalyserName -> hierarchyAnalyzer
-  )
-
-  val analysis = Json.obj(
-    "filter" -> filter,
-    "analyzer" -> analyzers
-  )
-
-  val imageSettings: String =
-    Json.stringify(Json.obj(
-      "analysis" -> analysis
-    )
-  )
+  val imageSettings: Map[String, Any] = List(
+    ("analysis" -> analysis)
+  ).toMap
 
 }
