@@ -2,12 +2,15 @@ package com.gu.mediaservice.lib.elasticsearch
 
 import java.net.InetSocketAddress
 
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesResponse
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.client.Client
 import org.elasticsearch.common.settings.Settings
 import org.elasticsearch.common.transport.TransportAddress
 import org.elasticsearch.transport.client.PreBuiltTransportClient
 import play.api.Logger
+
+import scala.collection.JavaConverters._
 
 trait ElasticSearchClient {
 
@@ -55,11 +58,12 @@ trait ElasticSearchClient {
   }
 
   def createIndex(index: String) {
+
     Logger.info(s"Creating index $index")
     client.admin.indices
       .prepareCreate(index)
       .addMapping(imageType, Mappings.imageMapping)
-      .setSettings(IndexSettings.imageSettings)
+      .setSettings(IndexSettings.imageSettings.asJava)
       .execute.actionGet
   }
 
@@ -89,7 +93,7 @@ trait ElasticSearchClient {
       .map(_.keys.toArray.map(_.toString).toList).getOrElse(Nil)
   }
 
-  def assignAliasTo(index: String) = {
+  def assignAliasTo(index: String): IndicesAliasesResponse = {
     Logger.info(s"Assigning alias $imagesAlias to $index")
     client.admin.indices
       .prepareAliases
@@ -97,7 +101,7 @@ trait ElasticSearchClient {
       .execute.actionGet
   }
 
-  def removeAliasFrom(index: String) = {
+  def removeAliasFrom(index: String): IndicesAliasesResponse = {
     Logger.info(s"Removing alias $imagesAlias from $index")
     client.admin.indices
       .prepareAliases
