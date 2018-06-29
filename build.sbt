@@ -36,7 +36,7 @@ lazy val commonLib = project("common-lib").settings(
     "com.amazonaws" % "aws-java-sdk" % "1.11.302",
     "org.elasticsearch" % "elasticsearch" % "6.3.0",
     "org.elasticsearch.client" % "transport" % "6.3.0",
-    "org.elasticsearch.client" % "rest" % "5.5.3",
+//    "org.elasticsearch.client" % "rest" % "5.5.3",
     "com.gu" %% "box" % "0.2.0",
     "org.scalaz.stream" %% "scalaz-stream" % "0.8.6",
     "com.drewnoakes" % "metadata-extractor" % "2.11.0",
