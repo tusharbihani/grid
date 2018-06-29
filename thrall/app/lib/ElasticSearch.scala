@@ -9,9 +9,9 @@ import org.elasticsearch.action.update.{UpdateRequestBuilder, UpdateResponse}
 import org.elasticsearch.action.updatebyquery.UpdateByQueryResponse
 import org.elasticsearch.client.UpdateByQueryClientWrapper
 import org.elasticsearch.index.engine.{DocumentMissingException, VersionConflictEngineException}
-import org.elasticsearch.index.query.FilterBuilders.{andFilter, missingFilter}
-import org.elasticsearch.index.query.QueryBuilders.{boolQuery, filteredQuery, matchAllQuery, matchQuery}
-import org.elasticsearch.script.ScriptService
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.QueryBuilders.{existsQuery, matchAllQuery, matchQuery}
+import org.elasticsearch.script.{Script, ScriptType}
 import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
@@ -23,12 +23,12 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
 
   import com.gu.mediaservice.lib.formatting._
 
-  val imagesAlias = config.writeAlias
-  val host = config.elasticsearchHost
-  val port = config.int("es.port")
-  val cluster = config("es.cluster")
+  private val imagesAlias = config.writeAlias
+  private val host = config.elasticsearchHost
+  private val port = config.int("es.port")
+  private val cluster = config("es.cluster")
 
-  val scriptType = ScriptService.ScriptType.valueOf("INLINE")
+  val scriptType = ScriptType.valueOf("INLINE")
 
   lazy val updateByQueryClient = new UpdateByQueryClientWrapper(client)
 
@@ -38,12 +38,9 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
     prepareImageUpdate(id) { request => request
       // Use upsert: if not present, will index the argument (the image)
       .setUpsert(Json.stringify(image))
-      // if already present, will run the script with the provided parameters
-      .setScriptParams(Map(
-      "doc" -> asGroovy(asImageUpdate(image)),
-      "lastModified" -> asGroovy(JsString(currentIsoDateString))
-    ).asJava)
-      .setScript(
+      .setScript(new Script(
+        ScriptType.INLINE,
+        "groovy",
         // Note: we merge old and new identifiers (in that order) to make easier to re-ingest
         // images without forwarding any existing identifiers.
         """| previousIdentifiers = ctx._source.identifiers;
@@ -56,7 +53,12 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
           refreshEditsScript +
           updateLastModifiedScript +
           addToSuggestersScript,
-        scriptType)
+        // if already present, will run the script with the provided parameters
+        Map(
+                "doc" -> asGroovy(asImageUpdate(image)),
+                "lastModified" -> asGroovy(JsString(currentIsoDateString))
+              ).asJava
+        ))
       .executeAndLog(s"Indexing image $id")
       .incrementOnSuccess(metrics.indexedImages)
     }
@@ -64,23 +66,22 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
 
   def deleteImage(id: String)(implicit ex: ExecutionContext): List[Future[DeleteResponse]] = {
 
-    val q = filteredQuery(
-      boolQuery.must(matchQuery("_id", id)),
-      andFilter(
-        missingOrEmptyFilter("exports"),
-        missingOrEmptyFilter("usages"))
-    )
+    val q = QueryBuilders
+      .boolQuery
+      .must(matchQuery("_id", id))
+      .mustNot(existsQuery("exports"))
+      .mustNot(existsQuery("usages"))
 
     prepareForMultipleIndexes { index =>
       // search for the image first, and then only delete and succeed
       // this is because the delete query does not respond with anything useful
       // TODO: is there a more efficient way to do this?
       client
-        .prepareCount(index)
+        .prepareSearch(index)
         .setQuery(q)
         .executeAndLog(s"Searching for image to delete: $id")
         .flatMap { countQuery =>
-          val deleteFuture = countQuery.getCount match {
+          val deleteFuture = countQuery.getHits.totalHits match {
             case 1 => client.prepareDelete(index, imageType, id).executeAndLog(s"Deleting image $id")
             case _ => Future.failed(ImageNotDeletable)
           }
@@ -92,18 +93,18 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
   }
 
   def updateImageUsages(id: String, usages: JsLookupResult, lastModified: JsLookupResult)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] = {
-    prepareImageUpdate(id) { request =>
-      request.setScriptParams(Map(
-        "usages" -> asGroovy(usages.getOrElse(JsNull)),
-        "lastModified" -> asGroovy(lastModified.getOrElse(JsNull))
-      ).asJava)
-      .setScript(
+    prepareImageUpdate(id) { request => request
+      .setScript(new Script(ScriptType.INLINE,
+        "groovy",
         s""" | if (!(ctx._source.usagesLastModified && ctx._source.usagesLastModified > lastModified)) {
             |   $replaceUsagesScript
             |   $updateLastModifiedScript
             | }
         """.stripMargin,
-        scriptType)
+        Map(
+          "usages" -> asGroovy(usages.getOrElse(JsNull)),
+          "lastModified" -> asGroovy(lastModified.getOrElse(JsNull))
+        ).asJava))
       .executeAndLog(s"updating usages on image $id")
       .recover { case e: DocumentMissingException => new UpdateResponse }
       .incrementOnFailure(metrics.failedUsagesUpdates) { case e: VersionConflictEngineException => true }
@@ -111,17 +112,17 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
   }
 
   def updateImageSyndicationRights(id: String, rights: JsLookupResult)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] = {
-    prepareImageUpdate(id) { request =>
-      request.setScriptParams(Map(
-        "syndicationRights" -> asGroovy(rights.getOrElse(JsNull)),
-        "lastModified" -> asGroovy(Json.toJson(DateTime.now().toString()))
-      ).asJava)
-        .setScript(
+    prepareImageUpdate(id) { request => request
+        .setScript(new Script(ScriptType.INLINE,
+        "groovy",
           s"""
              |   $replaceSyndicationRightsScript
              |   $updateLastModifiedScript
         """.stripMargin,
-          scriptType)
+          Map(
+            "syndicationRights" -> asGroovy(rights.getOrElse(JsNull)),
+            "lastModified" -> asGroovy(Json.toJson(DateTime.now().toString()))
+          ).asJava))
         .executeAndLog(s"updating syndicationRights on image $id")
         .recover { case e: DocumentMissingException => new UpdateResponse }
         .incrementOnFailure(metrics.failedSyndicationRightsUpdates) { case e: VersionConflictEngineException => true }
@@ -129,10 +130,11 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
   }
 
   def deleteAllImageUsages(id: String)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] = {
-    prepareImageUpdate(id) { request =>
-      request.setScript(
+    prepareImageUpdate(id) { request => request
+      .setScript(new Script(ScriptType.INLINE,
+        "groovy",
         deleteUsagesScript,
-          scriptType)
+        Map[String,Object]().asJava))
         .executeAndLog(s"removing all usages on image $id")
         .recover { case e: DocumentMissingException => new UpdateResponse }
         .incrementOnFailure(metrics.failedUsagesUpdates) { case e: VersionConflictEngineException => true }
@@ -140,15 +142,15 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
   }
 
   def updateImageLeases(id: String, leaseByMedia: JsLookupResult, lastModified: JsLookupResult)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] = {
-    prepareImageUpdate(id){ request =>
-      request.setScriptParams( Map(
-        "leaseByMedia" -> asGroovy(leaseByMedia.getOrElse(JsNull)),
-        "lastModified" -> asGroovy(lastModified.getOrElse(JsNull))
-      ).asJava)
-        .setScript(
+    prepareImageUpdate(id){ request => request
+      .setScript(new Script(ScriptType.INLINE,
+        "groovy",
           replaceLeasesScript +
             updateLastModifiedScript,
-          scriptType)
+        Map(
+          "leaseByMedia" -> asGroovy(leaseByMedia.getOrElse(JsNull)),
+          "lastModified" -> asGroovy(lastModified.getOrElse(JsNull))
+        ).asJava))
       .executeAndLog(s"updating leases on image $id with: $leaseByMedia")
       .recover { case e: DocumentMissingException => new UpdateResponse }
       .incrementOnFailure(metrics.failedUsagesUpdates) { case e: VersionConflictEngineException => true }
@@ -156,40 +158,37 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
   }
 
   def updateImageExports(id: String, exports: JsLookupResult)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] = {
-    prepareImageUpdate(id) { request =>
-      request.setScriptParams(Map(
-        "exports" -> asGroovy(exports.getOrElse(JsNull)),
-        "lastModified" -> asGroovy(JsString(currentIsoDateString))
-      ).asJava)
-        .setScript(
-          addExportsScript +
-            updateLastModifiedScript,
-          scriptType)
-        .executeAndLog(s"updating exports on image $id")
-        .incrementOnFailure(metrics.failedExportsUpdates) { case e: VersionConflictEngineException => true }
+    prepareImageUpdate(id) { request => request
+      .setScript(new Script(ScriptType.INLINE,
+      "groovy",
+        addExportsScript +
+          updateLastModifiedScript,
+        Map(
+          "exports" -> asGroovy(exports.getOrElse(JsNull)),
+          "lastModified" -> asGroovy(JsString(currentIsoDateString))
+        ).asJava))
+      .executeAndLog(s"updating exports on image $id")
+      .incrementOnFailure(metrics.failedExportsUpdates) { case e: VersionConflictEngineException => true }
     }
   }
 
   def deleteImageExports(id: String)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] =
-    prepareImageUpdate(id) { request =>
-      request.setScriptParams(Map(
-        "lastModified" -> asGroovy(JsString(currentIsoDateString))
-      ).asJava)
-        .setScript(
-          deleteExportsScript +
-            updateLastModifiedScript,
-          scriptType)
-        .executeAndLog(s"removing exports from image $id")
-        .incrementOnFailure(metrics.failedExportsUpdates) { case e: VersionConflictEngineException => true }
+    prepareImageUpdate(id) { request => request
+      .setScript(new Script(ScriptType.INLINE,
+      "groovy",
+        deleteExportsScript +
+          updateLastModifiedScript,
+        Map(
+          "lastModified" -> asGroovy(JsString(currentIsoDateString))
+        ).asJava))
+      .executeAndLog(s"removing exports from image $id")
+      .incrementOnFailure(metrics.failedExportsUpdates) { case e: VersionConflictEngineException => true }
     }
 
   def applyImageMetadataOverride(id: String, metadata: JsLookupResult, lastModified: JsLookupResult)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] = {
-    prepareImageUpdate(id) { request =>
-      request.setScriptParams(Map(
-        "userMetadata" -> asGroovy(metadata.getOrElse(JsNull)),
-        "lastModified" -> asGroovy(lastModified.getOrElse(JsNull))
-      ).asJava)
-      .setScript(
+    prepareImageUpdate(id) { request => request
+      .setScript(new Script(ScriptType.INLINE,
+        "groovy",
         s""" | if (!(ctx._source.userMetadataLastModified && ctx._source.userMetadataLastModified > lastModified)) {
             |   ctx._source.userMetadata = userMetadata;
             |   ctx._source.userMetadataLastModified = lastModified;
@@ -197,22 +196,25 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
             | }
       """.stripMargin +
           refreshEditsScript,
-        scriptType)
+        Map(
+          "userMetadata" -> asGroovy(metadata.getOrElse(JsNull)),
+          "lastModified" -> asGroovy(lastModified.getOrElse(JsNull))
+        ).asJava))
       .executeAndLog(s"updating user metadata on image $id")
       .incrementOnFailure(metrics.failedMetadataUpdates) { case e: VersionConflictEngineException => true }
     }
   }
 
   def setImageCollection(id: String, collections: JsLookupResult)(implicit ex: ExecutionContext): List[Future[UpdateResponse]] =
-    prepareImageUpdate(id) { request =>
-      request.setScriptParams(Map(
-        "collections" -> asGroovy(collections.getOrElse(JsNull)),
-        "lastModified" -> asGroovy(JsString(currentIsoDateString))
-      ).asJava)
-      .setScript(
+    prepareImageUpdate(id) { request => request
+      .setScript(new Script(ScriptType.INLINE,
+      "groovy",
         "ctx._source.collections = collections;" +
           updateLastModifiedScript,
-        scriptType)
+        Map(
+          "collections" -> asGroovy(collections.getOrElse(JsNull)),
+          "lastModified" -> asGroovy(JsString(currentIsoDateString))
+        ).asJava))
       .executeAndLog(s"setting collections on image $id")
       .incrementOnFailure(metrics.failedCollectionsUpdates) { case e: VersionConflictEngineException => true }
     }
@@ -220,7 +222,6 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
   def prepareImageUpdate(id: String)(op: UpdateRequestBuilder => Future[UpdateResponse]): List[Future[UpdateResponse]] = {
     prepareForMultipleIndexes( index => {
           val updateRequest = client.prepareUpdate(index, imageType, id)
-            .setScriptLang("groovy")
           op(updateRequest)
         }
     )
@@ -245,9 +246,6 @@ class ElasticSearch(config: ThrallConfig, metrics: ThrallMetrics) extends Elasti
       .incrementOnFailure(metrics.failedQueryUpdates) { case e: VersionConflictEngineException => true }
 
   def asGroovy(collection: JsValue) = new JsonSlurper().parseText(collection.toString)
-
-  def missingOrEmptyFilter(field: String) =
-    missingFilter(field).existence(true).nullValue(true)
 
   def asImageUpdate(image: JsValue): JsValue = {
     def removeUploadInformation: Reads[JsObject] =

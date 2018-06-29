@@ -4,11 +4,10 @@ package syntax
 import org.elasticsearch.action._
 import org.elasticsearch.action.get.GetResponse
 import org.elasticsearch.search.SearchHit
-import play.api.libs.json.{JsValue, Json}
-import scala.concurrent.{Future, Promise}
 import play.api.Logger
+import play.api.libs.json.{JsValue, Json}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 
 
 trait ElasticSearchSyntax {
@@ -42,13 +41,13 @@ trait ElasticSearchSyntax {
     def sourceOpt: Option[JsValue] = Option(self.getSourceAsString) map Json.parse
   }
 
-  final implicit class TermsBuilderSyntax(self: TermsBuilder) {
-    // Annoyingly you can't exclude by array in the JAVA API
-    // although you can in the REST client
-    def excludeList(list: List[String]) = {
-      self.exclude(list.map(Pattern.quote).mkString("|"))
-    }
-  }
+//  final implicit class TermsBuilderSyntax(self: TermsBuilder) {
+//    // Annoyingly you can't exclude by array in the JAVA API
+//    // although you can in the REST client
+//    def excludeList(list: List[String]) = {
+//      self.exclude(list.map(Pattern.quote).mkString("|"))
+//    }
+//  }
 
 }
 
