@@ -85,8 +85,7 @@ lazy val metadataEditor = playProject("metadata-editor", 9007)
 
 lazy val thrall = playProject("thrall", 9002).settings(
   libraryDependencies ++= Seq(
-    "org.codehaus.groovy" % "groovy-json" % "2.3.7",
-    "com.yakaz.elasticsearch.plugins" % "elasticsearch-action-updatebyquery" % "2.2.0"
+    "org.codehaus.groovy" % "groovy-json" % "2.3.7"
   )
 )
 
